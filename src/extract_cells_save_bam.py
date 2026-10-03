@@ -17,10 +17,10 @@ def main():
     return
 
 def extract_donors_from_pooled():
-    bam_file = "possorted_genome_bam.bam"
+    bam_file_path = "possorted_genome_bam.bam"
     donor_barcode_dict = defaultdict(list)
-    filtered_barcodes_path = "pool6_barcodes.tsv"
-    table_barcodes_path = "D11_pool6_barcode_donor.csv"
+    filtered_barcodes_path = "pool4_barcodes.tsv"
+    table_barcodes_path = "D11_pool4_barcode_donor.csv"
     # get the available barcodes 
     with open(filtered_barcodes_path, "r", encoding="utf-8") as f:
         for line in f:
@@ -40,14 +40,14 @@ def extract_donors_from_pooled():
                 #print(line.strip())
     # fo through each donor and then go through the bam file and save the corrosponding reads, modify the reads and save the donor file
     for donor, barcodes in donor_barcode_dict.items():
-        modify_barcode = "pool6_" + donor.split("-")[1]
+        modify_barcode = "pool4_" + donor.split("-")[1]
         file_to_save = modify_barcode + ".bam"
         tsv_to_save = modify_barcode + ".tsv"
         print(file_to_save, tsv_to_save, modify_barcode)
         cb_dict = defaultdict(list)
         for selected_cell in barcodes:
             cb_dict[selected_cell] = []
-        with pysam.AlignmentFile(bam_file, "rb") as bam_file:
+        with pysam.AlignmentFile(bam_file_path, "rb") as bam_file:
             # Iterate through all reads in the BAM file
             break_index = 0
             for read in bam_file.fetch():
@@ -65,7 +65,7 @@ def extract_donors_from_pooled():
         # modify the CB tag
         modified_cb_dict = modify_cb_tags(cb_dict, modify_barcode)
         # save the reads with modified CB tag
-        save_modified_reads(modified_cb_dict , file_to_save + tsv_to_save, bam_file)
+        save_modified_reads(modified_cb_dict , file_to_save, tsv_to_save, bam_file_path)
         cb_dict.clear()
     return
 
