@@ -9,11 +9,68 @@ from pathlib import Path
 UNIQUE_CELLS = 500 # number of cells required
 BAR_CODE_MIN_READ = 10_000 # Min number of reads corrosponding to cell
 SEED = 255
+DONOR_START = 225
 
 def main():
     #analysis_code()
     #extract_code()
-    extract_donors_from_pooled()
+    extract_donors_from_pooled_GSM()
+    return
+
+def extract_donors_from_pooled_GSM():
+    bam_file_path = "possorted_genome_bam.bam"
+    donor_barcode_dict = defaultdict(list)
+    filtered_barcodes_path = "barcodes.tsv"
+    table_barcodes_path = "donor_barcodes.csv"
+    # get the available barcodes 
+    with open(filtered_barcodes_path, "r", encoding="utf-8") as f:
+        for line in f:
+            print(line.strip())
+    # get the barcodes per donor
+    with open(table_barcodes_path, "r", encoding="utf-8") as f:
+            next(f)  # Skips the first line
+            for line in f:
+                line = line.strip()
+                donor = line.split(",")[0]
+                barcode = line.split(",")[1]
+                print(donor, barcode)
+                if donor not in donor_barcode_dict:
+                    donor_barcode_dict[donor] = []
+                else:
+                    donor_barcode_dict[donor].append(barcode)
+                #print(line.strip())
+    print(donor_barcode_dict)
+    # fo through each donor and then go through the bam file and save the corrosponding reads, modify the reads and save the donor file
+    donor_start = DONOR_START
+    for donor, barcodes in donor_barcode_dict.items():
+        modify_barcode = str(donor_start)
+        file_to_save = modify_barcode + ".bam"
+        tsv_to_save = modify_barcode + ".tsv"
+        print(file_to_save, tsv_to_save, modify_barcode)
+        cb_dict = defaultdict(list)
+        for selected_cell in barcodes:
+            cb_dict[selected_cell] = []
+        with pysam.AlignmentFile(bam_file_path, "rb") as bam_file:
+            # Iterate through all reads in the BAM file
+            break_index = 0
+            for read in bam_file.fetch():
+                if read.has_tag("CB"):  # Check if read has "CB" tag
+                    cb_tag = read.get_tag("CB")
+                    if cb_tag not in cb_dict:
+                        continue
+                    else:
+                        cb_dict[cb_tag].append(read)
+                if break_index > 500_500_000:
+                    break
+                break_index += 1
+                if break_index % 1_000_000 == 0:
+                    print(break_index)
+        # modify the CB tag
+        modified_cb_dict = modify_cb_tags(cb_dict, modify_barcode)
+        # save the reads with modified CB tag
+        save_modified_reads(modified_cb_dict , file_to_save, tsv_to_save, bam_file_path)
+        cb_dict.clear()
+        donor_start += 1
     return
 
 def extract_donors_from_pooled():
@@ -129,7 +186,7 @@ def modify_cb_tags(sampled_reads, modify_with):
     for cb_tag, reads in sampled_reads.items():
         # Modify the CB tag from ending with "-1" to "-2"
         if cb_tag.endswith("-1"):
-            new_cb_tag = cb_tag[:-2] + modify_with
+            new_cb_tag = cb_tag[:-1] + modify_with
         else:
             print(f"Warning: CB tag {cb_tag} does not end with '-1'.")
             new_cb_tag = cb_tag + "-" + modify_with
