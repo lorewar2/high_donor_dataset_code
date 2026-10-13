@@ -13,8 +13,8 @@ DONOR_START = 225
 
 def main():
     #analysis_code()
-    #extract_code()
-    extract_donors_from_pooled_GSM()
+    extract_donors_from_pooled()
+    #extract_donors_from_pooled_GSM()
     return
 
 def extract_donors_from_pooled_GSM():
@@ -76,8 +76,8 @@ def extract_donors_from_pooled_GSM():
 def extract_donors_from_pooled():
     bam_file_path = "possorted_genome_bam.bam"
     donor_barcode_dict = defaultdict(list)
-    filtered_barcodes_path = "pool4_barcodes.tsv"
-    table_barcodes_path = "D11_pool4_barcode_donor.csv"
+    filtered_barcodes_path = "barcodes.tsv"
+    table_barcodes_path = "D11_pool8_barcode_donor.csv"
     # get the available barcodes 
     with open(filtered_barcodes_path, "r", encoding="utf-8") as f:
         for line in f:
@@ -97,7 +97,7 @@ def extract_donors_from_pooled():
                 #print(line.strip())
     # fo through each donor and then go through the bam file and save the corrosponding reads, modify the reads and save the donor file
     for donor, barcodes in donor_barcode_dict.items():
-        modify_barcode = "pool4_" + donor.split("-")[1]
+        modify_barcode = "pool8_" + donor.split("-")[1]
         file_to_save = modify_barcode + ".bam"
         tsv_to_save = modify_barcode + ".tsv"
         print(file_to_save, tsv_to_save, modify_barcode)
