@@ -2,8 +2,10 @@
 prefetch --option-file SRR_Acc_List.txt -O ./sra --max-size u
 # decompress
 while read acc; do
-  fasterq-dump ./sra/$acc --split-files --include-technical -e 8 -O ./fastq13
+  fasterq-dump ./sra/$acc --split-files --include-technical -e 8 -O ./fastq14
 done < SRR_Acc_List.txt
+# fastq to fastq.gz
+pigz -p 16 *
 # rename
 lane=1 
 for srr in SRR18029{370..389}; do
