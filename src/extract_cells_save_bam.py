@@ -9,12 +9,13 @@ from pathlib import Path
 UNIQUE_CELLS = 500 # number of cells required
 BAR_CODE_MIN_READ = 10_000 # Min number of reads corrosponding to cell
 SEED = 255
-DONOR_START = 225
+DONOR_START = 0
+GSM_CODE = "GSM5899884"
 
 def main():
     #analysis_code()
-    extract_donors_from_pooled()
-    #extract_donors_from_pooled_GSM()
+    #extract_donors_from_pooled()
+    extract_donors_from_pooled_GSM()
     return
 
 def extract_donors_from_pooled_GSM():
@@ -43,7 +44,7 @@ def extract_donors_from_pooled_GSM():
     # fo through each donor and then go through the bam file and save the corrosponding reads, modify the reads and save the donor file
     donor_start = DONOR_START
     for donor, barcodes in donor_barcode_dict.items():
-        modify_barcode = str(donor_start)
+        modify_barcode = GSM_CODE + "_" + str(donor_start)
         file_to_save = modify_barcode + ".bam"
         tsv_to_save = modify_barcode + ".tsv"
         print(file_to_save, tsv_to_save, modify_barcode)
